@@ -51,7 +51,7 @@ function generateShare() {
 
 async function share() {
   const shareContent = {
-    text: generateShare() + `Athledle in ${areAthletesEqual(GUESSES[GUESSES.value.length-1], ATHLETE.value) ? GUESSES.value.length : "X"}/8`
+    text: generateShare() + `Athledle in ${areAthletesEqual(GUESSES.value[GUESSES.value.length-1], ATHLETE.value) ? GUESSES.value.length : "X"}/8`
   }
   if (navigator.share) {
     navigator
