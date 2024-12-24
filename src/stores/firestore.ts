@@ -31,7 +31,8 @@ export type Result = {
   guesses: Athlete[];
 };
 
-export function areAthletesEqual(athlete1: Athlete, athlete2: Athlete): boolean {
+export function areAthletesEqual(athlete1: Athlete|null, athlete2: Athlete|null): boolean {
+  if (athlete2 === null || athlete1 === null) return false;
   return athlete1.full_name === athlete2.full_name &&
     athlete1.team === athlete2.team;
 }
