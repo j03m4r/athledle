@@ -3,8 +3,8 @@
   import {RouterLink, RouterView} from 'vue-router'
   import {useAuthStore} from '@/stores/auth'
   import {storeToRefs} from 'pinia'
-  import Navbar from './components/Navbar.vue';
-  import Modal from './components/Modal.vue';
+  import Navbar from '@/components/Navbar.vue';
+  import Modal from '@/components/Modal.vue';
 
   const auth = useAuthStore();
   const {user} = storeToRefs(auth);
