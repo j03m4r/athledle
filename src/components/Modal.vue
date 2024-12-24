@@ -1,7 +1,7 @@
 <script setup>
 import ConfettiExplosion from "vue-confetti-explosion";
 import { useModalStore } from '@/stores/modal';
-import { useFirestoreStore, calculateAge, calculateHeightInches } from "@/stores/firestore";
+import { useFirestoreStore, areAthletesEqual, calculateAge, calculateHeightInches } from "@/stores/firestore";
 import { storeToRefs } from 'pinia';
 import { useToast } from 'vue-toast-notification';
 
@@ -51,7 +51,7 @@ function generateShare() {
 
 async function share() {
   const shareContent = {
-    text: generateShare() + `Athledle in ${GUESSES.value.length}/8`
+    text: generateShare() + `Athledle in ${areAthletesEqual(GUESSES[GUESSES.value.length-1], ATHLETE.value) ? GUESSES.value.length : "X"}/8`
   }
   if (navigator.share) {
     navigator
@@ -76,7 +76,7 @@ async function share() {
 <template>
   <ConfettiExplosion v-if="result === 'win'" />
   <div v-if="isOpen" @click="setOpen(false)"
-    class="z-40 bg-black bg-opacity-50 w-screen h-full flex justify-center items-start px-8 pt-24 absolute left-0 top-0">
+    class="z-40 bg-black bg-opacity-50 w-screen h-full flex justify-center items-start px-8 pt-16 md:pt-24 absolute left-0 top-0">
     <div @click.stop class="items-start p-8 z-50 w-full max-w-[500px] h-fit bg-white rounded-xl flex flex-col gap-y-4">
       <div class="flex w-full justify-end">
         <font-awesome-icon @click="setOpen(false)" icon="x" class="text-black cursor-pointer" />
