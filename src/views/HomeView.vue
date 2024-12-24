@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ColumnList from "../components/ColumnList.vue"
 import AthleteGuess from "../components/AthleteGuess.vue"
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, useTemplateRef } from 'vue'
 import { useFirestoreStore, type Athlete, areAthletesEqual } from '@/stores/firestore'
 import { useAuthStore } from '@/stores/auth'
 import { useModalStore } from "@/stores/modal"
@@ -19,6 +19,7 @@ const { login } = auth;
 const firestore = useFirestoreStore();
 const { GUESSES, ATHLETE } = storeToRefs(firestore);
 const { getAthlete, getAthletes, getResult, syncGuesses, searchAthletes } = firestore;
+const inputRef = useTemplateRef("input");
 
 const athlete = ref<Athlete | null>(null);
 const athletes = ref<Athlete[]>([]);
@@ -90,9 +91,12 @@ function selectAthlete(idx: number) {
     }
 
     syncGuesses(guesses.value);
+    if (inputRef.value) {
+        inputRef.value.blur();
+        isDropdownOpen.value = false;
+    }
 }
 </script>
-
 <template>
     <div v-if="isLoading" class="w-full flex justify-center items-center h-[20vh]">
         <pulse-loader :loading="true" :color="color"></pulse-loader>
@@ -101,9 +105,8 @@ function selectAthlete(idx: number) {
         <div v-if="!((guesses.length > 0 && athlete && guesses[guesses.length - 1].full_name === athlete.full_name) || guesses.length >= 8)"
             class="flex flex-col w-full justify-start items-center">
             <div class="relative w-full">
-                <input type="text" v-model="name_query" placeholder="Search athletes" @focus="isDropdownOpen = true"
-                    @blur="onBlur"
-                    class="focus:outline-none focus:rounded-b-none placeholder:text-gray-400 px-10 py-5 rounded-lg w-full" />
+                <input type="text" v-model="name_query" placeholder="Search athletes" @focus="isDropdownOpen = true" @blur="onBlur" @keydown.enter="selectAthlete(0)"
+                    class="focus:outline-none focus:rounded-b-none placeholder:text-gray-400 px-10 py-5 rounded-lg w-full" ref="input" />
                 <font-awesome-icon icon="magnifying-glass" class="absolute left-4 top-6 text-gray-400" />
                 <div v-if="isDropdownOpen"
                     class="overflow-y-scroll px-2 absolute bottom-0 translate-y-full w-full max-h-[20vh] md:max-h-[30vh] bg-white rounded-b-lg z-20">

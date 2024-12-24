@@ -1,71 +1,83 @@
 <script setup>
-  import ConfettiExplosion from "vue-confetti-explosion";
-  import {useModalStore} from '@/stores/modal';
-  import {useFirestoreStore, calculateAge, calculateHeightInches} from "@/stores/firestore";
-  import {storeToRefs} from 'pinia';
+import ConfettiExplosion from "vue-confetti-explosion";
+import { useModalStore } from '@/stores/modal';
+import { useFirestoreStore, calculateAge, calculateHeightInches } from "@/stores/firestore";
+import { storeToRefs } from 'pinia';
+import { useToast } from 'vue-toast-notification';
 
-  const modal = useModalStore();
-  const {isOpen, result} = storeToRefs(modal);
-  const {setOpen} = modal;
+const modal = useModalStore();
+const { isOpen, result } = storeToRefs(modal);
+const { setOpen } = modal;
 
-  const firestore = useFirestoreStore();
-  const {ATHLETE, GUESSES} = storeToRefs(firestore);
+const firestore = useFirestoreStore();
+const { ATHLETE, GUESSES } = storeToRefs(firestore);
 
-  function generateShare() {
-    let shareStr = '';
-    const keys = ['league', 'team', 'pos', 'age', 'height']
-    GUESSES.value.forEach(guess => {
-      const ans = ATHLETE.value;
-      const athleteKeys = Object.keys(ans);
+const $toast = useToast();
 
-      keys.forEach(key => {
-        if (key === "age") {
-          if (calculateAge(guess.dob) === calculateAge(ans.dob)) {
-            shareStr += "🟩"
-          } else {
-            shareStr += "🟨"
-          }
-        } else if (key === "height") {
-          if (calculateHeightInches(guess.height_feet, guess.height_inches) === calculateHeightInches(ans.height_feet, ans.height_inches)) {
-            shareStr += "🟩"
-          } else {
-            shareStr += "🟨"
-          }
+function generateShare() {
+  let shareStr = '';
+  const keys = ['league', 'team', 'position', 'age', 'height']
+  GUESSES.value.forEach(guess => {
+    const ans = ATHLETE.value;
+    const athleteKeys = Object.keys(ans);
+
+    keys.forEach(key => {
+      if (key === "age") {
+        if (calculateAge(guess.dob) === calculateAge(ans.dob)) {
+          shareStr += "🟩"
         } else {
-          if (guess[key] === ans[key]) {
-            shareStr += "🟩"
-          } else {
-            shareStr += "🟥"
-          }
+          shareStr += "🟨"
         }
+      } else if (key === "height") {
+        if (calculateHeightInches(guess.height_feet, guess.height_inches) === calculateHeightInches(ans.height_feet, ans.height_inches)) {
+          shareStr += "🟩"
+        } else {
+          shareStr += "🟨"
+        }
+      } else {
+        if (guess[key] === ans[key]) {
+          shareStr += "🟩"
+        } else {
+          shareStr += "🟥"
+        }
+      }
+    })
+
+    shareStr += "\n";
+  });
+
+  return shareStr
+}
+
+async function share() {
+  const shareContent = {
+    text: generateShare() + `Athledle in ${GUESSES.value.length}/8`
+  }
+  if (navigator.share) {
+    navigator
+      .share(shareContent)
+      .then(() => {
+        $toast.success('Successfully shared content', {
+          duration: 5000
+        })
       })
-
-      shareStr += "\n";
-    });
-
-    return shareStr
+      .catch((error) => {
+        $toast.error('Failed to share content', {
+          duration: 5000
+        })
+      });
+  } else {
+    $toast.error('Sharing is unsupported in this browser', {
+      duration: 5000
+    })
   }
-
-  async function share() {
-    const shareContent = {
-      text: generateShare() + `Athledle in ${GUESSES.value.length}/8`
-    }
-    if (navigator.share) {
-      navigator
-        .share(shareContent)
-        .then(() => console.log('Content shared successfully'))
-        .catch((error) => console.error('Error sharing content:', error));
-    } else {
-      console.log("Sharing not supported in this browser :(")
-    }
-  }
+}
 </script>
 <template>
   <ConfettiExplosion v-if="result === 'win'" />
   <div v-if="isOpen" @click="setOpen(false)"
     class="z-40 bg-black bg-opacity-50 w-screen h-full flex justify-center items-start px-8 pt-24 absolute left-0 top-0">
-    <div @click.stop
-      class="items-start p-8 z-50 w-full max-w-[500px] h-fit bg-white rounded-xl flex flex-col gap-y-4">
+    <div @click.stop class="items-start p-8 z-50 w-full max-w-[500px] h-fit bg-white rounded-xl flex flex-col gap-y-4">
       <div class="flex w-full justify-end">
         <font-awesome-icon @click="setOpen(false)" icon="x" class="text-black cursor-pointer" />
       </div>
