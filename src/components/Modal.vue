@@ -76,7 +76,7 @@ async function share() {
 <template>
   <ConfettiExplosion v-if="result === 'win'" />
   <div v-if="isOpen" @click="setOpen(false)"
-    class="z-40 bg-black bg-opacity-50 w-screen h-full flex justify-center items-start px-8 pt-16 md:pt-24 absolute left-0 top-0">
+    class="z-40 bg-black bg-opacity-50 w-screen h-screen flex justify-center items-start px-8 pt-16 md:pt-24 absolute left-0 top-0">
     <div @click.stop class="items-start p-8 z-50 w-full max-w-[500px] h-fit bg-white rounded-xl flex flex-col gap-y-4">
       <div class="flex w-full justify-end">
         <font-awesome-icon @click="setOpen(false)" icon="x" class="text-black cursor-pointer" />
