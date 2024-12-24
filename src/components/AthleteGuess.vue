@@ -16,13 +16,15 @@ onMounted(() => {
   // Name styling
   if (areAthletesEqual(props._athlete, props.athlete)) {
     setTimeout(() => {
-      athleteName.value.style.color = green;
+      if (athleteName.value !== null) {
+        (athleteName.value as HTMLElement).style.color = green;
+      }
     }, props.isLast ? 3000 : 0);
   }
 
   // League styling
   setTimeout(() => {
-    const leagueHint = hints[0];
+    const leagueHint = hints[0] as HTMLElement;
     if (props._athlete.league === props.athlete.league) {
       leagueHint.style.borderColor = green;
       leagueHint.style.color = green;
@@ -34,7 +36,7 @@ onMounted(() => {
 
   // Team styling
   setTimeout(() => {
-    const teamHint = hints[1];
+    const teamHint = hints[1] as HTMLElement;
     if (props._athlete.team === props.athlete.team) {
       teamHint.style.borderColor = green;
       teamHint.style.color = green;
@@ -46,7 +48,7 @@ onMounted(() => {
 
   // Position styling
   setTimeout(() => {
-    const positionHint = hints[2];
+    const positionHint = hints[2] as HTMLElement;
     if (props._athlete.position === props.athlete.position) {
       positionHint.style.borderColor = green;
       positionHint.style.color = green;
@@ -58,7 +60,7 @@ onMounted(() => {
 
   // Age styling
   setTimeout(() => {
-    const ageHint = hints[3];
+    const ageHint = hints[3] as HTMLElement;
     if (calculateAge(props._athlete.dob) === calculateAge(props.athlete.dob)) {
       ageHint.style.borderColor = green;
       ageHint.style.color = green;
@@ -70,7 +72,7 @@ onMounted(() => {
 
   // Height styling
   setTimeout(() => {
-    const heightHint = hints[4];
+    const heightHint = hints[4] as HTMLElement;
     if (
       calculateHeightInches(props._athlete.height_feet, props._athlete.height_inches) ===
       calculateHeightInches(props.athlete.height_feet, props.athlete.height_inches)
