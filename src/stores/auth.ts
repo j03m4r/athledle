@@ -11,6 +11,7 @@ import {
 } from 'firebase/auth';
 import { useFirebaseStore } from './firebase';
 import { useFirestoreStore } from './firestore';
+import { useToast } from 'vue-toast-notification';
 
 /*
   * Pinia store for global access to firebase authentication data and utilities
@@ -19,6 +20,7 @@ export const useAuthStore = defineStore('auth', () => {
   const firebase = useFirebaseStore();
   const firestore = useFirestoreStore();
   const auth = getAuth(firebase.app);
+  const $toast = useToast();
 
   const user = ref<User | null>(null);
   const authUnsubscribe = ref<Unsubscribe | null>(null);
@@ -48,13 +50,20 @@ export const useAuthStore = defineStore('auth', () => {
         const resultExists = await firestore.checkIfResultExists();
         if (firestore.GUESSES.length > 0 && !resultExists) {
           firestore.syncGuesses(firestore.GUESSES)
+        } else {
+          firestore.getResult();
         }
+        $toast.success('Successfully logged in', {
+          duration: 5000
+        })
         return true;
       }
       return false;
     } catch (error) {
-      console.error("Login failed:", error); // TODO :: Replace with some kind of notification like toastr
-      throw error;
+      $toast.error('Failed to login', {
+        duration: 5000
+      })
+      return false;
     }
   }
 
@@ -62,7 +71,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await signOut(auth);
     } catch (error) {
-      console.error("Failed to logout:", error); // TODO :: Replace with some kind of notification like toastr
+      $toast.error('Failed to logout', {
+        duration: 5000
+      })
       return false;
     }
 
@@ -74,6 +85,10 @@ export const useAuthStore = defineStore('auth', () => {
 
     // Ensure user state is null after logout
     user.value = null;
+    firestore.GUESSES = [];
+    $toast.success('Successfully logged out', {
+      duration: 5000
+    })
     return true;
   }
 

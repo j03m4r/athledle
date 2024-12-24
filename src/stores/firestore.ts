@@ -10,6 +10,7 @@ import {
   arrayUnion,
 } from 'firebase/firestore';
 import Fuse from 'fuse.js';
+import { useToast } from 'vue-toast-notification';
 
 export type Athlete = {
   full_name: string;
@@ -31,7 +32,7 @@ export type Result = {
   guesses: Athlete[];
 };
 
-export function areAthletesEqual(athlete1: Athlete|null, athlete2: Athlete|null): boolean {
+export function areAthletesEqual(athlete1: Athlete | null, athlete2: Athlete | null): boolean {
   if (athlete2 === null || athlete1 === null) return false;
   return athlete1.full_name === athlete2.full_name &&
     athlete1.team === athlete2.team;
@@ -66,6 +67,7 @@ export const useFirestoreStore = defineStore('firestore', () => {
   const firebase = useFirebaseStore();
   const auth = useAuthStore()
   const db = getFirestore(firebase.app);
+  const $toast = useToast();
   let athletes = [] as Athlete[]
 
   const GUESSES = ref<Athlete[]>([]);
@@ -96,7 +98,9 @@ export const useFirestoreStore = defineStore('firestore', () => {
       }
       return null;
     } catch (error) {
-      console.error("Athlete fetch failed:", error); // TODO :: Replace with some kind of notification like toastr
+      $toast.error('Athlete fetch failed', {
+        duration: 5000
+      })
       throw error;
     }
   }
@@ -121,8 +125,10 @@ export const useFirestoreStore = defineStore('firestore', () => {
       fuse.setCollection(_athletes);
       return _athletes;
     } catch (error) {
-      console.error("Athletes fetch failed:", error);
-      throw error;
+      $toast.error('Athletes fetch failed', {
+        duration: 5000
+      })
+      return [];
     }
   }
 
@@ -149,7 +155,10 @@ export const useFirestoreStore = defineStore('firestore', () => {
       return null;
     } catch (error) {
       console.error("Result fetch failed:", error); // TODO :: Replace with some kind of notification like toastr
-      throw error;
+      $toast.error('Could not fetch existing user result', {
+        duration: 5000
+      })
+      return null;
     }
   }
 
@@ -171,7 +180,9 @@ export const useFirestoreStore = defineStore('firestore', () => {
         return false;
       }
     } catch (error) {
-      console.error("Error checking document:", error);
+      $toast.error('Could not fetch existing user result', {
+        duration: 5000
+      })
       return false;
     }
   };
@@ -202,7 +213,9 @@ export const useFirestoreStore = defineStore('firestore', () => {
 
       return true;
     } catch (error) {
-      console.error(`Error syncing guesses:`, error);
+      $toast.error('Error syncing guesses', {
+        duration: 5000
+      })
       return false;
     }
   }
