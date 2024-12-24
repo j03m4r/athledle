@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@property --white {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: #faf9f6;
+}
+
+@property --cream {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: #F1F0F0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: var(--cream);
+}
+
+* {
+    box-sizing: border-box;
+    font-family: "Inter", serif;
+}
+
+html {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: start;
+}
