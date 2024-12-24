@@ -2,7 +2,7 @@
     import ColumnList from "../components/ColumnList.vue"
     import AthleteGuess from "../components/AthleteGuess.vue"
     import {ref, onMounted, watch} from 'vue'
-    import { useFirestoreStore, Athlete, areAthletesEqual } from '@/stores/firestore'
+    import { useFirestoreStore, type Athlete, areAthletesEqual } from '@/stores/firestore'
     import { useAuthStore } from '@/stores/auth'
     import { useModalStore } from "@/stores/modal"
     import { storeToRefs } from 'pinia'
@@ -68,6 +68,7 @@
     }
 
     function selectAthlete(idx: number) {
+        if (athlete === null) return;
         guesses.value.push(athletes.value[idx]);
         const guesses_names = guesses.value.map((athlete) => athlete.full_name);
         athletes.value = athletes.value.filter((athlete) => !guesses_names.includes(athlete.full_name))
