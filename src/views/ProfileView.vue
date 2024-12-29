@@ -12,10 +12,10 @@ const { login, logout, ensureInitialized } = auth;
 const firestore = useFirestoreStore();
 const { getStats } = firestore;
 
-const winBarRef = useTemplateRef("win-bar");
+const winBarRef = useTemplateRef<HTMLElement>("win-bar");
 
 const isLoading = ref<boolean>(true);
-const color = ref("#3B3636")
+const color = ref<string>("#3B3636")
 const stats = ref<Stats | null>(null);
 const winPercent = ref(0);
 const lossPercent = ref(0);
@@ -63,8 +63,8 @@ onMounted(async () => {
     winPercent.value = ceilToDecimal((stats.value.win_count / stats.value.game_count) * 100, 1);
     lossPercent.value = (100 - winPercent.value).toFixed(1);
     if (winBarRef.value) {
-      const winSpan = winBarRef.value.children[0];
-      const lossSpan = winBarRef.value.children[1];
+      const winSpan: HTMLElement = winBarRef.value.children[0] as HTMLElement;
+      const lossSpan: HTMLElement = winBarRef.value.children[1] as HTMLElement;
       winSpan.style.width = `${winPercent.value}%`;
       lossSpan.style.width = `${lossPercent.value}%`;
     }

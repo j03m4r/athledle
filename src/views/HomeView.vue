@@ -28,7 +28,7 @@ const guesses = ref<Athlete[]>([]);
 const name_query = ref<string>("");
 const isDropdownOpen = ref<boolean>(false);
 const isLoading = ref<boolean>(true);
-const color = ref("#3B3636")
+const color = ref<string>("#3B3636")
 const guesses_names = ref<string[]>([]);
 
 onMounted(async () => {
@@ -76,7 +76,7 @@ function onBlur() {
 
 function selectAthlete(key: string) {
   if (athlete === null) return;
-  let _athlete = null;
+  let _athlete: Athlete = {} as Athlete;
   if (key === "first") {
     _athlete = athletes[0]
     } else {
