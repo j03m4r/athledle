@@ -61,7 +61,7 @@ onMounted(async () => {
 
   if (stats.value !== null) {
     winPercent.value = ceilToDecimal((stats.value.win_count / stats.value.game_count) * 100, 1).toString();
-    lossPercent.value = (100 - winPercent.value).toFixed(1);
+    lossPercent.value = (100 - Number(winPercent.value)).toFixed(1);
     if (winBarRef.value) {
       const winSpan: HTMLElement = winBarRef.value.children[0] as HTMLElement;
       const lossSpan: HTMLElement = winBarRef.value.children[1] as HTMLElement;
