@@ -17,11 +17,11 @@ const winBarRef = useTemplateRef<HTMLElement>("win-bar");
 const isLoading = ref<boolean>(true);
 const color = ref<string>("#3B3636")
 const stats = ref<Stats | null>(null);
-const winPercent = ref(0);
-const lossPercent = ref(0);
+const winPercent = ref<string>("");
+const lossPercent = ref<string>("");
 const guessesChartData = ref({
   labels: ['1', '2', '3', '4', '5', '6', '7', '8'],
-  datasets: [{ data: [0, 0, 0, 0, 0, 0, 0, 0] }]
+  datasets: [{ label: "Guesses", backgroundColor: color.value, data: [0, 0, 0, 0, 0, 0, 0, 0] }]
 });
 const guessesChartOptions = ref({
   responsive: true,
@@ -60,7 +60,7 @@ onMounted(async () => {
   await nextTick();
 
   if (stats.value !== null) {
-    winPercent.value = ceilToDecimal((stats.value.win_count / stats.value.game_count) * 100, 1);
+    winPercent.value = ceilToDecimal((stats.value.win_count / stats.value.game_count) * 100, 1).toString();
     lossPercent.value = (100 - winPercent.value).toFixed(1);
     if (winBarRef.value) {
       const winSpan: HTMLElement = winBarRef.value.children[0] as HTMLElement;
