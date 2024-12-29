@@ -8,6 +8,7 @@ import {
   getDoc,
   setDoc,
   arrayUnion,
+  updateDoc,
 } from 'firebase/firestore';
 import Fuse from 'fuse.js';
 import { useToast } from 'vue-toast-notification';
@@ -30,6 +31,19 @@ export type Athlete = {
 export type Result = {
   result: string;
   guesses: Athlete[];
+};
+
+export type Stats = {
+  game_count: number;
+  win_count: number;
+  1: number;
+  2: number;
+  3: number;
+  4: number;
+  5: number;
+  6: number;
+  7: number;
+  8: number;
 };
 
 export function areAthletesEqual(athlete1: Athlete | null, athlete2: Athlete | null): boolean {
@@ -72,6 +86,7 @@ export const useFirestoreStore = defineStore('firestore', () => {
 
   const GUESSES = ref<Athlete[]>([]);
   const ATHLETE = ref<Athlete | null>(null);
+  const STATS = ref<Stats | null>(null);
 
   const fuse = new Fuse([] as Athlete[], {
     keys: ['full_name'],
@@ -135,7 +150,7 @@ export const useFirestoreStore = defineStore('firestore', () => {
   /*
    * Fetches the user's result (athlete guesses) for the current day.
    */
-  async function getResult(): Promise<Result | null> {
+  async function getResult(cache: boolean): Promise<Result | null> {
     if (auth.user === null) return null;
     try {
       let result: Result | null = null;
@@ -149,12 +164,13 @@ export const useFirestoreStore = defineStore('firestore', () => {
       const result_doc_snap = await getDoc(result_ref);
       if (result_doc_snap.exists()) {
         result = result_doc_snap.data() as Result;
-        GUESSES.value = result.guesses;
+        if (cache) {
+          GUESSES.value = result.guesses;
+        }
         return result;
       }
       return null;
     } catch (error) {
-      console.error("Result fetch failed:", error); // TODO :: Replace with some kind of notification like toastr
       $toast.error('Could not fetch existing user result', {
         duration: 5000
       })
@@ -162,30 +178,61 @@ export const useFirestoreStore = defineStore('firestore', () => {
     }
   }
 
-  async function checkIfResultExists(): Promise<boolean> {
-    if (auth.user === null) return false;
-    try {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      const date_str = `${year}-${month}-${day}`;
-
-      const docRef = doc(db, "users", auth.user.uid, "results", date_str);
-      const docSnapshot = await getDoc(docRef);
-
-      if (docSnapshot.exists()) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (error) {
-      $toast.error('Could not fetch existing user result', {
-        duration: 5000
-      })
+  async function writeStat(result: Result): Promise<boolean> {
+    if (auth.user === null || result.result === "incomplete") return false; // No point in writing stats: no user or user hasn't achieved win or loss for today
+    const res = await getResult(false);
+    if (res && (res.result === "win" || res.result === "loss")) {
+      // In this case, we've already written a win/loss result to the db in the past for this day so
+      // stats should have already been written because when a win or loss is FIRST achieved for the day we should write stats
       return false;
+    } else if (result.result === "win" || result.result === "loss") {
+      // Win or loss result hasn't been written YET. Either there doesn't exist a document yet
+      // or it was previously an "incomplete" result
+      const stats_ref = doc(db, "users", auth.user.uid, "profile", "stats");
+      const stats_doc_snap = await getDoc(stats_ref);
+
+      const guess_num = result.guesses.length;
+      if (stats_doc_snap.exists()) {
+        STATS.value = stats_doc_snap.data() as Stats;
+        STATS.value = {
+          ...STATS.value,
+          game_count: STATS.value.game_count + 1,
+          win_count: STATS.value.win_count + (result.result === "win" ? 1 : 0),
+          [guess_num]: STATS.value[guess_num] + (result.result === "win" ? 1 : 0)
+        };
+        await updateDoc(stats_ref, STATS.value);
+      } else {
+        STATS.value = {
+          game_count: 1,
+          win_count: result.result === "win" ? 1 : 0,
+          1: guess_num === 1 ? 1 : 0,
+          2: guess_num === 2 ? 1 : 0,
+          3: guess_num === 3 ? 1 : 0,
+          4: guess_num === 4 ? 1 : 0,
+          5: guess_num === 5 ? 1 : 0,
+          6: guess_num === 6 ? 1 : 0,
+          7: guess_num === 7 ? 1 : 0,
+          8: guess_num === 8 && result.result === "win" ? 1 : 0
+        };
+        await setDoc(stats_ref, STATS.value);
+      }
+
+      return true;
     }
-  };
+
+    return false;
+  }
+
+  async function getStats(): Promise<Stats | null> {
+    if (auth.user === null) return null;
+    const stats_ref = doc(db, "users", auth.user.uid, "profile", "stats");
+    const stats_doc_snap = await getDoc(stats_ref);
+    if (stats_doc_snap.exists()) {
+      STATS.value = stats_doc_snap.data() as Stats;
+      return STATS.value;
+    }
+    return null;
+  }
 
   async function syncGuesses(guesses: Athlete[]): Promise<boolean> {
     GUESSES.value = guesses;
@@ -204,6 +251,7 @@ export const useFirestoreStore = defineStore('firestore', () => {
             ? "loss"
             : "incomplete";
 
+      await writeStat(({ result: result, guesses: guesses } as Result));
       const docRef = doc(db, "users", auth.user.uid, "results", date_str);
 
       await setDoc(docRef, {
@@ -231,5 +279,5 @@ export const useFirestoreStore = defineStore('firestore', () => {
     return _athletes.filter((athlete) => !guesses.includes(athlete.full_name));
   }
 
-  return { GUESSES, ATHLETE, getAthlete, getAthletes, getResult, checkIfResultExists, syncGuesses, searchAthletes }
+  return { GUESSES, ATHLETE, getAthlete, getAthletes, getResult, getStats, syncGuesses, searchAthletes }
 });

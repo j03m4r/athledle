@@ -47,11 +47,9 @@ export const useAuthStore = defineStore('auth', () => {
       const res = await signInWithPopup(auth, provider);
       if (res.user) {
         user.value = res.user;
-        const resultExists = await firestore.checkIfResultExists();
-        if (firestore.GUESSES.length > 0 && !resultExists) {
+        const result = await firestore.getResult(true);
+        if (firestore.GUESSES.length > 0 && !result) {
           firestore.syncGuesses(firestore.GUESSES)
-        } else {
-          firestore.getResult();
         }
         $toast.success('Successfully logged in', {
           duration: 5000
