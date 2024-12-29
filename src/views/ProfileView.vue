@@ -75,15 +75,15 @@ onMounted(async () => {
 function changeToGameCount() {
   if (stats.value && winBarRef.value) {
     const losses = (stats.value.game_count - stats.value.win_count)
-    winBarRef.value.children[0].innerHTML = winPercent.value > 0 ? `${stats.value.win_count ?? 0} ${stats.value.win_count === 1 ? "Game" : "Games"}` : '';
-    winBarRef.value.children[1].innerHTML = lossPercent.value > 0 ? `${losses} ${stats.value.win_count === 0 ? "Game" : "Games"}` : '';
+    winBarRef.value.children[0].innerHTML = Number(winPercent.value) > 0 ? `${stats.value.win_count ?? 0} ${stats.value.win_count === 1 ? "Game" : "Games"}` : '';
+    winBarRef.value.children[1].innerHTML = Number(lossPercent.value) > 0 ? `${losses} ${stats.value.win_count === 0 ? "Game" : "Games"}` : '';
   }
 }
 
 function changeToWinPercent() {
   if (stats.value && winBarRef.value) {
-    winBarRef.value.children[0].innerHTML = winPercent.value > 0 ? `${winPercent.value}%` : '';
-    winBarRef.value.children[1].innerHTML = lossPercent.value > 0 ? `${lossPercent.value}%` : '';
+    winBarRef.value.children[0].innerHTML = Number(winPercent.value) > 0 ? `${winPercent.value}%` : '';
+    winBarRef.value.children[1].innerHTML = Number(lossPercent.value) > 0 ? `${lossPercent.value}%` : '';
   }
 }
 </script>
