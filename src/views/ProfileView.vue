@@ -16,11 +16,25 @@ const winBarRef = useTemplateRef("win-bar");
 
 const isLoading = ref<boolean>(true);
 const color = ref("#3B3636")
-const stats = ref<Stats>(null);
+const stats = ref<Stats | null>(null);
 const winPercent = ref(0);
 const lossPercent = ref(0);
-const guessesChartData = ref(null);
-const guessesChartOptions = ref(null);
+const guessesChartData = ref({
+  labels: ['1', '2', '3', '4', '5', '6', '7', '8'],
+  datasets: [{ data: [0, 0, 0, 0, 0, 0, 0, 0] }]
+});
+const guessesChartOptions = ref({
+  responsive: true,
+  scales: {
+    y: {
+      display: true,
+      ticks: {
+        min: 0,
+        stepSize: 1
+      },
+    },
+  },
+});
 
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
@@ -40,29 +54,12 @@ onMounted(async () => {
       labels: ['1', '2', '3', '4', '5', '6', '7', '8'],
       datasets: [{ label: "Guesses", backgroundColor: color.value, data: [stats.value["1"], stats.value["2"], stats.value["3"], stats.value["4"], stats.value["5"], stats.value["6"], stats.value["7"], stats.value["8"]] }]
     };
-    guessesChartOptions.value = {
-      responsive: true,
-      scales: {
-        y: {
-          display: true,
-          ticks: {
-            min: 0,
-            stepSize: 1
-          },
-        },
-      },
-    }
   }
 
   isLoading.value = false;
   await nextTick();
 
-  if (stats.value === null) {
-    guessesChartData.value = {
-      labels: ['1', '2', '3', '4', '5', '6', '7', '8'],
-      datasets: [{ data: [0, 0, 0, 0, 0, 0, 0, 0] }]
-    };
-  } else {
+  if (stats.value !== null) {
     winPercent.value = ceilToDecimal((stats.value.win_count / stats.value.game_count) * 100, 1);
     lossPercent.value = (100 - winPercent.value).toFixed(1);
     if (winBarRef.value) {
