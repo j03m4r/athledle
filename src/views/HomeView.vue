@@ -125,7 +125,7 @@ function onClearInput() {
       class="flex flex-col w-full justify-start items-center">
       <div class="relative w-full">
         <input ref="input" type="text" v-model="name_query" placeholder="Search athletes" @focus="isDropdownOpen = true"
-          @blur="onBlur" @keydown.enter="selectAthlete('first')"
+          @blur="onBlur"
           class="focus:outline-none focus:rounded-b-none placeholder:text-gray-400 px-10 py-5 rounded-lg w-full" />
         <font-awesome-icon icon="magnifying-glass" class="absolute left-4 top-6 text-black" />
         <font-awesome-icon @click="onClearInput()" icon="x" :class='{ "hidden": name_query === "" }'
